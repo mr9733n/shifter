@@ -26,7 +26,6 @@ def set_process_name(name):
 
 set_process_name("Shifter")
 setup(console=["shifter.py"],
-      py_modules=["shifter_utils"],
       data_files=[("", ["config.json"])],
       options={"py2exe": {"bundle_files": 1, "includes": ["requests"]}})
 
