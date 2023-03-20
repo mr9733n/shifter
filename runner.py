@@ -1,5 +1,4 @@
 import subprocess
-import shifter_utils
 
 # subprocess.Popen(["python", "shifter.py"])
 while True:

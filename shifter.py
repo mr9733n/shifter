@@ -2,12 +2,25 @@ import os
 import shutil
 import re
 import datetime
-import shifter_utils
-import signal
-from shifter_utils import LOG_FOLDER, LOG_FILE_PREFIX, DEBUG_LOG_FILE_PREFIX, LOG_FILE_EXTENSION, LOG_FILE_NAME_FORMAT, LOG_DEBUG_PATH, LOG_PATH
 import sys
 from pathlib import Path
+import json
+import platform
+import shutil
+import time
+import schedule
 
+
+# Set up global log-related variables
+LOG_FOLDER = os.path.join(os.path.dirname(os.path.abspath(__file__)), "Logs")
+LOG_FILE_PREFIX = "log_"
+DEBUG_LOG_FILE_PREFIX = "debug_"
+LOG_FILE_EXTENSION = ".log"
+LOG_FILE_NAME_FORMAT = "{}" + LOG_FILE_EXTENSION
+LOG_DEBUG_PATH = os.path.join(LOG_FOLDER, DEBUG_LOG_FILE_PREFIX +
+                              LOG_FILE_NAME_FORMAT.format(datetime.datetime.today().strftime("%Y-%m-%d")))
+LOG_PATH = os.path.join(LOG_FOLDER, LOG_FILE_PREFIX +
+                        LOG_FILE_NAME_FORMAT.format(datetime.datetime.today().strftime("%Y-%m-%d")))
 """
 read_config: a function that reads a JSON file containing the configuration for the script, and returns a dictionary containing the configuration. The function modifies the paths of the destination folders depending on the operating system.
 check_and_create_folder(folder_path, log_messages): a function that checks if a folder exists, and creates it if it doesn't. It takes two arguments: folder_path, which is the path of the folder to check/create, and log_messages, which is a list of log messages that will be updated depending on whether the folder was created or not.
@@ -19,6 +32,64 @@ LOG_PATH: a global variable that represents the path of the log file that collec
 LOG_DEBUG_PATH: a global variable that represents the path of the debug log file that collects extended info with names of copied files.
 
 """
+
+
+def read_config():
+    with open("config.json", "r") as f:
+        config = json.load(f)
+
+    # Modify destination folder paths for different operating systems
+    if platform.system() == "Windows":
+        for folder_name, folder_config in config["destination_folders"].items():
+            folder_config["path"] = os.path.join("C:", folder_config["path"])
+    else:
+        for folder_name, folder_config in config["destination_folders"].items():
+            folder_config["path"] = os.path.join("/", folder_config["path"])
+
+    return config
+
+
+def write_to_log(log_path, messages):
+    """Writed log messages to file"""
+    # print(write_to_log.__doc__)
+    with open(log_path, "a") as f:
+        for message in messages:
+            f.write(
+                f"{datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S')} {message}\n")
+
+
+def write_to_debug_log(log_path, messages):
+    """Writed log messages to debug file"""
+    # print(write_to_debug_log.__doc__)
+    with open(log_path, "a") as f:
+        for message in messages:
+            f.write(
+                f"{datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S')} {message}\n")
+
+
+def run_copy_job():
+    """Scheduled the copy job to run at a specific time"""
+    # print(run_copy_job.__doc__)
+    config = read_config()
+    scheduled_time_str = config.get("scheduled_on_time")
+    if scheduled_time_str:
+        try:
+            hour, minute = [int(x) for x in scheduled_time_str.split(":")]
+            if hour >= 0 and hour < 24 and minute >= 0 and minute < 60:
+                # Schedule job to run at the specified time
+                schedule.every().day.at(scheduled_time_str).do(run_copy_job)
+            else:
+                print(
+                    "Invalid scheduled time format in config file. Using default schedule.")
+        except ValueError:
+            print("Invalid scheduled time format in config file. Using default schedule.")
+    else:
+        # Use default schedule if no scheduled time is specified in config file
+        schedule.every(1).hour.do(run_copy_job)
+
+    while True:
+        schedule.run_pending()
+        time.sleep(1)
 
 
 def check_and_create_folder(folder_path, log_messages):
@@ -49,6 +120,7 @@ def get_files(source_dir, ext, pattern=None):
         if any(file.endswith(e) for e in ext) and (not pattern or re.search(pattern, file)):
             files.append(os.path.join(source_dir, file))
     return files
+
 
 def copy_then_remove_files(source_folder, dest_folder, ext, delete_after_copy=False, pattern=None):
     """
@@ -101,17 +173,19 @@ def copy_then_remove_files(source_folder, dest_folder, ext, delete_after_copy=Fa
 
 def copy_files_in_folders():
     """Copies files from source folders to destination folders"""
-    config = shifter_utils.read_config()
+    config = read_config()
     dest_folders = config["destination_folders"]
     log_messages = []
     total_count = 0
 
     # Get source folders from config
-    source_folders = [os.path.expandvars(folder) for folder in config["source_folders"]]
+    source_folders = [os.path.expandvars(folder)
+                      for folder in config["source_folders"]]
 
     for source_folder in source_folders:
         if not os.path.exists(source_folder):
-            log_messages.append(f"Source folder '{source_folder}' does not exist")
+            log_messages.append(
+                f"Source folder '{source_folder}' does not exist")
             continue
 
         for folder_name, folder_config in dest_folders.items():
@@ -147,20 +221,23 @@ def copy_files_in_folders():
                     os.remove(file_path)
 
             total_count += count
-            log_messages.append(f"Copied {count} files from {source_folder} to {dest_dir}")
+            log_messages.append(
+                f"Copied {count} files from {source_folder} to {dest_dir}")
 
             # Write filenames to debug log
-            debug_log_path = os.path.join(LOG_FOLDER, DEBUG_LOG_FILE_PREFIX + LOG_FILE_NAME_FORMAT.format(datetime.datetime.today().strftime("%Y-%m-%d"), "debug"))
-            shifter_utils.write_to_debug_log(debug_log_path, [f"Copied {count} files from '{source_folder}' to '{dest_dir}'"])
+            debug_log_path = os.path.join(LOG_FOLDER, DEBUG_LOG_FILE_PREFIX + LOG_FILE_NAME_FORMAT.format(
+                datetime.datetime.today().strftime("%Y-%m-%d"), "debug"))
+            write_to_debug_log(debug_log_path, [
+                               f"Copied {count} files from '{source_folder}' to '{dest_dir}'"])
 
     # write all log messages to file
-    shifter_utils.write_to_log(LOG_PATH, log_messages)
-    shifter_utils.write_to_debug_log(LOG_DEBUG_PATH, log_messages)
+    write_to_log(LOG_PATH, log_messages)
+    write_to_debug_log(LOG_DEBUG_PATH, log_messages)
 
     # write total count to log
     print(f"Total files copied: {total_count}")
-    shifter_utils.write_to_log(LOG_PATH, [f"Total files copied: {total_count}"])
-    shifter_utils.write_to_debug_log(LOG_DEBUG_PATH, [f"Total files copied: {total_count}"])
+    write_to_log(LOG_PATH, [f"Total files copied: {total_count}"])
+    write_to_debug_log(LOG_DEBUG_PATH, [f"Total files copied: {total_count}"])
 
 
 if __name__ == '__main__':
@@ -169,9 +246,10 @@ if __name__ == '__main__':
             print("Started...")
             logs_dir = Path.cwd() / "Logs"
             logs_dir.mkdir(parents=True, exist_ok=True)
-            shifter_utils.write_to_log(LOG_PATH, [f"Service started..."])
-            shifter_utils.write_to_debug_log(LOG_DEBUG_PATH, [f"Service started..."])
+            write_to_log(LOG_PATH, [f"Service started..."])
+            write_to_debug_log(LOG_DEBUG_PATH, [f"Service started..."])
             copy_files_in_folders()
-            shifter_utils.run_copy_job()
+            run_copy_job()
         except:
+            print("Stopping...")
             sys.exit()

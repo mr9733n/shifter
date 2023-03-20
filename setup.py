@@ -23,6 +23,7 @@ def set_process_name(name):
             libSystem = cdll.LoadLibrary("libSystem.dylib")
             libSystem.libproc_name(name.encode('utf-8'))
 
+
 set_process_name("Shifter")
 setup(console=["shifter.py"],
       py_modules=["shifter_utils"],
@@ -32,7 +33,7 @@ setup(console=["shifter.py"],
 while True:
     # Start the script in a new subprocess
     process = subprocess.Popen([sys.executable, "shifter.py"])
-        
+
     print("File Shifter Started")
     # Wait for the subprocess to finish
     process.communicate()

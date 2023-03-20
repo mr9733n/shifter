@@ -6,35 +6,35 @@ This Python script is designed to copy files from source folders to destination 
 ## Configuration
 Configuration settings are stored in a JSON file named config.json in the same directory as the script. The configuration file contains the following properties:
 
-|Parameter Name |Description | 
---- | --- |
-|source_folders| an array of strings representing the source folders to copy files from. |
-|destination_folders| an object containing destination folder configurations. |
+| Parameter Name      | Description                                                             |
+| ------------------- | ----------------------------------------------------------------------- |
+| source_folders      | an array of strings representing the source folders to copy files from. |
+| destination_folders | an object containing destination folder configurations.                 |
 
 Each configuration contains the following properties:
-|Parameter Name |Description | 
---- | --- |
-|path| a string representing the destination folder path. |
-|file_extensions| an array of strings representing the file extensions to copy. |
-|delete_after_copy| a boolean indicating whether to delete the files from the source after they have been copied.
-|pattern| (optional) a regular expression pattern that the file names must match to be copied. |
-|scheduled_on_time| (optional) a string representing the time at which to run the copy job on a schedule. The format should be "HH:MM". |
+| Parameter Name    | Description                                                                                                         |
+| ----------------- | ------------------------------------------------------------------------------------------------------------------- |
+| path              | a string representing the destination folder path.                                                                  |
+| file_extensions   | an array of strings representing the file extensions to copy.                                                       |
+| delete_after_copy | a boolean indicating whether to delete the files from the source after they have been copied.                       |
+| pattern           | (optional) a regular expression pattern that the file names must match to be copied.                                |
+| scheduled_on_time | (optional) a string representing the time at which to run the copy job on a schedule. The format should be "HH:MM". |
 * Note: Destination folder paths are modified based on the operating system being used. On Windows, the path is prefixed with "C:", while on other operating systems, it is prefixed with "/".
 
 ## Functions
 The script contains several functions that are used to copy files and log messages. These functions are described below.
 
-|Parameter Name |Description | 
---- | --- |
-|read_config() |This function reads the configuration file and returns a dictionary containing the configuration settings. |
-|check_and_create_folder(folder_path, log_messages)|This function checks if the specified folder exists and creates it if it doesn't. It appends log messages to the log_messages list.|
-|write_to_log(log_path, messages)|This function writes the log messages to a log file at the specified path.|
-|copy_then_remove_files(source_dir, dest_dir, ext, delete_after_copy, pattern=None)|This function copies files from the source directory to the destination directory and optionally deletes them from the source. It returns the number of files copied.|
-|copy_files_in_folders()|This function iterates over the source folders and destination folders defined in the configuration file and calls |
-|copy_then_remove_files()| for each combination. It also writes log messages to the log file.|
-|run_copy_job()|This function schedules the copy_files_in_folders() function to run at a specific time, as defined in the configuration file. If no specific time is defined, it runs the function every hour.|
-|signal_handler(signal, frame)|This function is a signal handler that catches the interrupt signal and performs any necessary cleanup before exiting the script.|
-|Running the Script|To run the script, simply execute it with Python from the command line. The script will run once and copy any files that match the configuration settings. To run the script as a service and schedule it to run at a specific time, execute the script with Python and leave it running. It will continue to run and copy files according to the schedule.
+| Parameter Name                                                                     | Description                                                                                                                                                                                                                                                                                                                                                 |
+| ---------------------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| read_config()                                                                      | This function reads the configuration file and returns a dictionary containing the configuration settings.                                                                                                                                                                                                                                                  |
+| check_and_create_folder(folder_path, log_messages)                                 | This function checks if the specified folder exists and creates it if it doesn't. It appends log messages to the log_messages list.                                                                                                                                                                                                                         |
+| write_to_log(log_path, messages)                                                   | This function writes the log messages to a log file at the specified path.                                                                                                                                                                                                                                                                                  |
+| copy_then_remove_files(source_dir, dest_dir, ext, delete_after_copy, pattern=None) | This function copies files from the source directory to the destination directory and optionally deletes them from the source. It returns the number of files copied.                                                                                                                                                                                       |
+| copy_files_in_folders()                                                            | This function iterates over the source folders and destination folders defined in the configuration file and calls                                                                                                                                                                                                                                          |
+| copy_then_remove_files()                                                           | for each combination. It also writes log messages to the log file.                                                                                                                                                                                                                                                                                          |
+| run_copy_job()                                                                     | This function schedules the copy_files_in_folders() function to run at a specific time, as defined in the configuration file. If no specific time is defined, it runs the function every hour.                                                                                                                                                              |
+| signal_handler(signal, frame)                                                      | This function is a signal handler that catches the interrupt signal and performs any necessary cleanup before exiting the script.                                                                                                                                                                                                                           |
+| Running the Script                                                                 | To run the script, simply execute it with Python from the command line. The script will run once and copy any files that match the configuration settings. To run the script as a service and schedule it to run at a specific time, execute the script with Python and leave it running. It will continue to run and copy files according to the schedule. |
 
 * To stop the script, press CTRL + C to send an interrupt signal. The script will catch the signal and perform any necessary cleanup before exiting.
 
@@ -101,5 +101,3 @@ python setup.py py2exe
 Save the file and close the text editor.
 
 To build your executable, simply double-click on the build.bat file in Windows Explorer. This will open a command prompt window and run the setup.py script with the specified options.
-
-That's it! You should now have a Windows executable file in the 

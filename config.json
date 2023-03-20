@@ -6,19 +6,19 @@
   "destination_folders": {
     "folder1": {
       "path": "C:/9834758345hf73/temp",
-      "file_extensions": [".torrent"],
+      "file_extensions": [ ".torrent" ],
       "delete_after_copy": false,
-	    "pattern": null 
+      "pattern": null
     },
     "folder2": {
       "path": "C:/9834758345hf73/temp/folder2",
-      "file_extensions": [".txt", ".csv", ".pdf"],
+      "file_extensions": [ ".txt", ".csv", ".pdf" ],
       "delete_after_copy": false,
-	    "pattern": null
+      "pattern": null
     },
     "folder3": {
       "path": "C:/9834758345hf73/temp/folder3",
-      "file_extensions": [".zip"],
+      "file_extensions": [ ".zip" ],
       "delete_after_copy": true,
       "pattern": null
     }
