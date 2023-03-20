@@ -8,7 +8,6 @@ import signal
 import time
 import schedule
 
-
 # Set up global log-related variables
 LOG_FOLDER = os.path.join(os.path.dirname(os.path.abspath(__file__)), "Logs")
 LOG_FILE_PREFIX = "log_"
@@ -18,9 +17,8 @@ LOG_FILE_NAME_FORMAT = "{}_{}" + LOG_FILE_EXTENSION
 LOG_DEBUG_PATH = os.path.join(LOG_FOLDER, DEBUG_LOG_FILE_PREFIX + LOG_FILE_NAME_FORMAT.format(datetime.datetime.today().strftime("%Y-%m-%d"), "debug"))
 LOG_PATH = os.path.join(LOG_FOLDER, LOG_FILE_PREFIX + LOG_FILE_NAME_FORMAT.format(datetime.datetime.today().strftime("%Y-%m-%d"), "regular"))
 
-
 def read_config():
-    with open("config.json", "r") as f:
+    with open("config.json", "r") as f:     
         config = json.load(f)
 
     # Modify destination folder paths for different operating systems
@@ -72,13 +70,3 @@ def run_copy_job():
     while True:
         schedule.run_pending()
         time.sleep(1)
-
-# define a signal handler to catch the interrupt signal
-def signal_handler(signal, frame):
-    print("Stopping...")
-    # perform any necessary cleanup here
-    # ...
-    exit(0)
-
-# set the signal handler
-signal.signal(signal.SIGINT, signal_handler)

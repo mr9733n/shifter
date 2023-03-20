@@ -1,11 +1,12 @@
 import os
-from pathlib import Path
 import shutil
 import re
 import datetime
 import shifter_utils
+import signal
 from shifter_utils import LOG_FOLDER, LOG_FILE_PREFIX, DEBUG_LOG_FILE_PREFIX, LOG_FILE_EXTENSION, LOG_FILE_NAME_FORMAT, LOG_DEBUG_PATH, LOG_PATH
-
+import sys
+from pathlib import Path
 
 """
 read_config: a function that reads a JSON file containing the configuration for the script, and returns a dictionary containing the configuration. The function modifies the paths of the destination folders depending on the operating system.
@@ -163,10 +164,14 @@ def copy_files_in_folders():
 
 
 if __name__ == '__main__':
-    print("Started...")
-    logs_dir = Path.cwd() / "Logs"
-    logs_dir.mkdir(parents=True, exist_ok=True)
-    shifter_utils.write_to_log(LOG_PATH, [f"Service started..."])
-    shifter_utils.write_to_debug_log(LOG_DEBUG_PATH, [f"Service started..."])
-    copy_files_in_folders()
-    shifter_utils.run_copy_job()
+    while True:
+        try:
+            print("Started...")
+            logs_dir = Path.cwd() / "Logs"
+            logs_dir.mkdir(parents=True, exist_ok=True)
+            shifter_utils.write_to_log(LOG_PATH, [f"Service started..."])
+            shifter_utils.write_to_debug_log(LOG_DEBUG_PATH, [f"Service started..."])
+            copy_files_in_folders()
+            shifter_utils.run_copy_job()
+        except:
+            sys.exit()
