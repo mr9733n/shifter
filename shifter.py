@@ -1,12 +1,8 @@
-import json
 import os
-import platform
+from pathlib import Path
 import shutil
 import re
 import datetime
-import signal
-import time
-import schedule
 import shifter_utils
 from shifter_utils import LOG_FOLDER, LOG_FILE_PREFIX, DEBUG_LOG_FILE_PREFIX, LOG_FILE_EXTENSION, LOG_FILE_NAME_FORMAT, LOG_DEBUG_PATH, LOG_PATH
 
@@ -167,7 +163,9 @@ def copy_files_in_folders():
 
 
 if __name__ == '__main__':
-    print("Started...")    
+    print("Started...")
+    logs_dir = Path.cwd() / "Logs"
+    logs_dir.mkdir(parents=True, exist_ok=True)
     shifter_utils.write_to_log(LOG_PATH, [f"Service started..."])
     shifter_utils.write_to_debug_log(LOG_DEBUG_PATH, [f"Service started..."])
     copy_files_in_folders()
