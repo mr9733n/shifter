@@ -79,14 +79,20 @@ config.json file template:
 ## Installation
 
 open a command prompt and run the following command to install the py2exe package:
-```pip install py2exe```
-Next, you will need to install the requests package, which is used by the shifter_utils.py module. Run the following command:
-```pip install requests```
-Finally, you will need to install the pypiwin32 package, which is required by py2exe to create Windows executables. Run the following command:
-```pip install pypiwin32```
-Once you have installed all the dependencies, you can create a command file to run the setup.py script. Create a new text file and name it build.bat.
 
-Open the build.bat file in a text editor and paste the following code:
+```pip install py2exe```
+
+Next, you will need to install the requests package, which is used by the shifter_utils.py module. Run the following command:
+
+```pip install requests```
+
+Finally, you will need to install the pypiwin32 package, which is required by py2exe to create Windows executables. Run the following command:
+
+```pip install pypiwin32```
+
+
+Once you have installed all the dependencies, you can create a command file to run the setup.py script. Create a new text file and name it build.bat and paste the following code:
+
 ```
 vbnet
 Copy code
@@ -98,6 +104,5 @@ cd /d "%~dp0"
 REM Run setup.py with py2exe options
 python setup.py py2exe
 ```
-Save the file and close the text editor.
 
 To build your executable, simply double-click on the build.bat file in Windows Explorer. This will open a command prompt window and run the setup.py script with the specified options.
