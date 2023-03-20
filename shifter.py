@@ -69,7 +69,6 @@ def write_to_debug_log(log_path, messages):
 
 def run_copy_job():
     """Scheduled the copy job to run at a specific time"""
-    # print(run_copy_job.__doc__)
     config = read_config()
     scheduled_time_str = config.get("scheduled_on_time")
     if scheduled_time_str:
@@ -78,6 +77,7 @@ def run_copy_job():
             if hour >= 0 and hour < 24 and minute >= 0 and minute < 60:
                 # Schedule job to run at the specified time
                 schedule.every().day.at(scheduled_time_str).do(run_copy_job)
+                write_to_debug_log(LOG_DEBUG_PATH, [f"Copy job scheduled to run at {scheduled_time_str}"])
             else:
                 print(
                     "Invalid scheduled time format in config file. Using default schedule.")
@@ -86,9 +86,12 @@ def run_copy_job():
     else:
         # Use default schedule if no scheduled time is specified in config file
         schedule.every(1).hour.do(run_copy_job)
+        write_to_debug_log(LOG_DEBUG_PATH, [f"Copy job scheduled to run every hour"])
 
     while True:
         schedule.run_pending()
+        # Debug:
+        # write_to_debug_log(LOG_DEBUG_PATH, ["Copy job is running"])
         time.sleep(1)
 
 
@@ -123,52 +126,54 @@ def get_files(source_dir, ext, pattern=None):
 
 
 def copy_then_remove_files(source_folder, dest_folder, ext, delete_after_copy=False, pattern=None):
-    """
-    Copies files with specified extensions and pattern from source directory to destination directory 
-    and optionally deletes them from source.
-    """
-    log_messages = "Creating destination folder..."
-    # Create a set to store the names of the files that have already been copied
-    copied_files = set()
+    """Copies files with specified extensions and pattern from source directory to destination directory and optionally deletes them from source."""
+    # Get file paths in source directory
+    file_paths = get_files(source_folder, ext, pattern)
 
-    # Check if the destination folder exists, and create it if it doesn't
-    check_and_create_folder(dest_folder, log_messages)
+    # Create destination folder if it doesn't exist
+    check_and_create_folder(dest_folder, [f"Creating destination folder: {dest_folder}"])
 
-    # Check if there is already a log file in the destination folder
-    log_path = os.path.join(dest_folder, "log.txt")
-    if os.path.exists(log_path):
-        # If there is, read the file and add the names of the copied files to the set
-        with open(log_path, "r") as f:
-            for line in f:
-                file_name = line.strip()
-                if file_name:
-                    copied_files.add(file_name)
+    # Create log folder if it doesn't exist
+    check_and_create_folder(LOG_FOLDER, [f"Creating log folder: {LOG_FOLDER}"])
 
-    count = 0
-    for file_path in get_files(source_folder, ext, pattern):
-        file_name = os.path.basename(file_path)
-        if file_name in copied_files:
-            # If the file has already been copied, skip it
-            continue
+    # Open log file
+    with open(LOG_PATH, "a") as log_file:
+        log_file.write(f"\n\nCopying process started at {datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S')}\n")
+        log_file.write(f"Source folder: {source_folder}\n")
+        log_file.write(f"Destination folder: {dest_folder}\n")
+        log_file.write(f"File extensions: {', '.join(ext)}\n")
+        if pattern:
+            log_file.write(f"Pattern: {pattern}\n")
+        log_file.write("\n")
 
-        # Copy the file to the destination folder
-        dest_path = os.path.join(dest_folder, file_name)
-        shutil.copy2(file_path, dest_path)
-        count += 1
+        # Open debug log file
+        with open(LOG_DEBUG_PATH, "a") as debug_log_file:
+            debug_log_file.write(f"\n\nCopying process started at {datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S')}\n")
+            debug_log_file.write(f"Source folder: {source_folder}\n")
+            debug_log_file.write(f"Destination folder: {dest_folder}\n")
+            debug_log_file.write(f"File extensions: {', '.join(ext)}\n")
+            if pattern:
+                debug_log_file.write(f"Pattern: {pattern}\n")
+            debug_log_file.write("\n")
 
-        # Add the name of the copied file to the set
-        copied_files.add(file_name)
+            # Copy files and log the process
+            for file_path in file_paths:
+                file_name = os.path.basename(file_path)
+                dest_file_path = os.path.join(dest_folder, file_name)
+                shutil.copy2(file_path, dest_file_path)
+                log_file.write(f"Copied {file_name} to {dest_folder}\n")
+                debug_log_file.write(f"Copied {file_name} from {source_folder} to {dest_folder}\n")
 
-        # If delete_after_copy is True, delete the original file
-        if delete_after_copy:
-            os.remove(file_path)
+                # Delete file from source if delete_after_copy is True
+                if delete_after_copy:
+                    os.remove(file_path)
+                    log_file.write(f"Deleted {file_name} from {source_folder}\n")
+                    debug_log_file.write(f"Deleted {file_name} from {source_folder}\n")
+                    
+            # Write end of copy process to log files
+            log_file.write(f"\nCopying process ended at {datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S')}\n")
+            debug_log_file.write(f"\nCopying process ended at {datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S')}\n")
 
-    # Write the names of the copied files to the log file
-    with open(log_path, "w") as f:
-        for file_name in copied_files:
-            f.write(file_name + "\n")
-
-    return count
 
 
 def copy_files_in_folders():
@@ -241,6 +246,8 @@ def copy_files_in_folders():
 
 
 if __name__ == '__main__':
+    script_path = Path(sys.argv[0]).resolve()
+    os.chdir(script_path.parent)
     while True:
         try:
             print("Started...")
