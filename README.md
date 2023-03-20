@@ -74,7 +74,6 @@ config.json file template:
     - "%USERPROFILE%/Downloads" uses for windows 
     - "scheduled_on_time": "HH:MM"
     - "pattern": "^IMG_[0-9]+\\.jpg$"
-```
 
 ## Installation
 
@@ -101,3 +100,8 @@ python setup.py py2exe
 Save the file and close the text editor.
 
 To build your executable, simply double-click on the build.bat file in Windows Explorer. This will open a command prompt window and run the setup.py script with the specified options.
+<<<<<<< HEAD
+=======
+
+That's it! You should now have a Windows executable file in the 
+>>>>>>> 7d4903d3aa6973da220dc7ed17a0bb1257940c39
