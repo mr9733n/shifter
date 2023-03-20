@@ -74,7 +74,7 @@ config.json file template:
     - "%USERPROFILE%/Downloads" uses for windows 
     - "scheduled_on_time": "HH:MM"
     - "pattern": "^IMG_[0-9]+\\.jpg$"
-```
+
 
 ## Installation
 
