@@ -76,7 +76,7 @@ def copy_files_job():
 def run_copy_job():
     """Scheduled the copy job to run at a specific time"""
     config = read_config()
-    scheduled = config.get("scheduled_every_15_minutes")
+    scheduled_every_15_minutes = config.get("scheduled_every_15_minutes")
     scheduled_time_str = config.get("scheduled_on_time")
     
     if scheduled_every_15_minutes:
