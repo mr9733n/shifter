@@ -93,6 +93,7 @@ def run_copy_job():
         # Debug:
         # write_to_debug_log(LOG_DEBUG_PATH, ["Copy job is running"])
         time.sleep(1)
+        copy_files_in_folders()
 
 
 def check_and_create_folder(folder_path, log_messages):
