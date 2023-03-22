@@ -76,10 +76,10 @@ def copy_files_job():
 def run_copy_job():
     """Scheduled the copy job to run at a specific time"""
     config = read_config()
-    scheduled_every_15_minutes = config.get("scheduled_every_15_minutes")
+    scheduled = config.get("scheduled_every_15_minutes")
     scheduled_time_str = config.get("scheduled_on_time")
     
-    if scheduled_every_15_minutes:
+    if scheduled:
         if scheduled_time_str:
             try:
                 hour, minute = [int(x) for x in scheduled_time_str.split(":")]
@@ -95,7 +95,7 @@ def run_copy_job():
                 print("Invalid scheduled time format in config file. Using default schedule.")
         else:
             schedule.every(15).minute.do(copy_files_job)
-            write_to_debug_log(LOG_DEBUG_PATH, [f"Copy job scheduled to run every 15 minutes"])
+    
     else:
         # Use default schedule if no scheduled time is specified in config file
         schedule.every(1).hour.do(copy_files_job)
@@ -104,7 +104,7 @@ def run_copy_job():
     while True:
         schedule.run_pending()
         time.sleep(1)
-
+        
 
 def check_and_create_folder(folder_path, log_messages):
     """Checked if folder exists, create it if it doesn't"""
