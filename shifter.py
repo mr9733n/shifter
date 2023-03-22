@@ -67,33 +67,43 @@ def write_to_debug_log(log_path, messages):
                 f"{datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S')} {message}\n")
 
 
+def copy_files_job():
+    """Function to copy files"""
+    copy_files_in_folders()
+    write_to_debug_log(LOG_DEBUG_PATH, ["Copy job is running"])
+
+
 def run_copy_job():
     """Scheduled the copy job to run at a specific time"""
     config = read_config()
+    scheduled = config.get("scheduled_every_15_minutes")
     scheduled_time_str = config.get("scheduled_on_time")
-    if scheduled_time_str:
-        try:
-            hour, minute = [int(x) for x in scheduled_time_str.split(":")]
-            if hour >= 0 and hour < 24 and minute >= 0 and minute < 60:
+    
+    if scheduled_every_15_minutes:
+        if scheduled_time_str:
+            try:
+                hour, minute = [int(x) for x in scheduled_time_str.split(":")]
+                if hour >= 0 and hour < 24 and minute >= 0 and minute < 60:
                 # Schedule job to run at the specified time
-                schedule.every().day.at(scheduled_time_str).do(run_copy_job)
-                write_to_debug_log(LOG_DEBUG_PATH, [f"Copy job scheduled to run at {scheduled_time_str}"])
-            else:
-                print(
-                    "Invalid scheduled time format in config file. Using default schedule.")
-        except ValueError:
-            print("Invalid scheduled time format in config file. Using default schedule.")
+                    schedule.every().day.at(scheduled_time_str).do(copy_files_job)
+                
+                    write_to_debug_log(LOG_DEBUG_PATH, [f"Copy job scheduled to run at {scheduled_time_str}"])
+                else:
+                    print(
+                        "Invalid scheduled time format in config file. Using default schedule.")
+            except ValueError:
+                print("Invalid scheduled time format in config file. Using default schedule.")
+        else:
+            schedule.every(15).minute.do(copy_files_job)
+            write_to_debug_log(LOG_DEBUG_PATH, [f"Copy job scheduled to run every 15 minutes"])
     else:
         # Use default schedule if no scheduled time is specified in config file
-        schedule.every(1).hour.do(run_copy_job)
+        schedule.every(1).hour.do(copy_files_job)
         write_to_debug_log(LOG_DEBUG_PATH, [f"Copy job scheduled to run every hour"])
 
     while True:
         schedule.run_pending()
-        # Debug:
-        # write_to_debug_log(LOG_DEBUG_PATH, ["Copy job is running"])
         time.sleep(1)
-        copy_files_in_folders()
 
 
 def check_and_create_folder(folder_path, log_messages):
