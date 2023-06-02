@@ -24,5 +24,6 @@
     }
   },
   "scheduled_every_15_minutes": true,
-  "scheduled_on_time": null
+  "scheduled_on_time": null,
+  "run_once": true
 }
