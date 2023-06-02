@@ -180,9 +180,12 @@ def copy_files_in_folders():
                 dest_files.add(file_name)
                 # If delete_after_copy is True, delete the original file
                 if delete_after_copy:
-                    os.remove(file_path)
-                    write_to_debug_log(LOG_DEBUG_PATH, [f"Deleted {file_name} from {source_folder}\n"])
-
+                    try:
+                        os.remove(file_path)
+                        write_to_debug_log(LOG_DEBUG_PATH, [f"Deleted {file_name} from {source_folder}\n"])
+                    except OSError as e:
+                        log_messages.append(f"Error deleting {file_name} from {source_folder}: {e}")
+                        
             total_count += count
             log_messages.append(f"Copied {count} files from {source_folder} to {dest_dir}")
 
